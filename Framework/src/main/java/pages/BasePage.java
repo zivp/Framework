@@ -16,6 +16,8 @@ public static WebDriver initChromeDriver(String appURL) {
 	driver.manage().window().maximize();
 	driver.navigate().to(appURL);
 	return driver;
+	
+	
 }
 
 
