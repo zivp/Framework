@@ -219,6 +219,7 @@ public static void ClickJS(WebElement Elament,WebDriver driver ) throws Exceptio
 	}
 	
 	
+	
 }
 
 //get all links To Click ('a') and put them in list
