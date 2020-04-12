@@ -2,12 +2,17 @@ package pages;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -16,21 +21,30 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import Data.Log;
+
 public class BasePage {
 	
 static WebDriver driver;
 static String driverPath = "C:\\Users\\win-8\\Desktop\\SeleniumDrivers\\chromedriver.exe";
+static JavascriptExecutor js;
+static final Logger LOG = LogManager.getLogger(BasePage.class.getName());
+
 
 public static WebDriver initChromeDriver(String appURL) {
-	System.out.println("Launching google chrome with new profile..");
+	LOG.info("Launching google chrome with new profile..");
+	// System.setProperty("http.proxyHost", "192.168.0.1");
+  //   System.setProperty("http.proxyPort", "8080");
 	System.setProperty("webdriver.chrome.driver", driverPath);
 	WebDriver driver = new ChromeDriver();
+	driver.get(appURL);
 	driver.manage().window().maximize();
-	driver.navigate().to(appURL);
-	driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+	driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 	return driver;
 }
 	
+
+
 // return WebElement by locator and type
 public static WebElement getElement(String locator, String type) {
 	type = type.toLowerCase();
@@ -129,14 +143,14 @@ public static boolean isElementPresent(String locator, String type) {
 public static WebElement waitForElement(By locator, int timeout) {
 	WebElement element = null;
 	try {
-		System.out.println("Waiting for max:: " + timeout + " seconds for element to be available");
+		LOG.info("Waiting for max:: " + timeout + " seconds for element to be available");
 		
 		WebDriverWait wait = new WebDriverWait(driver, 3);
 		element = wait.until(
 				ExpectedConditions.visibilityOfElementLocated(locator));
-		System.out.println("Element appeared on the web page");	
+		LOG.info("Element appeared on the web page");	
 	} catch(Exception e) {
-		System.out.println("Element not appeared on the web page");
+		LOG.error("Element not appeared on the web page");
 	}
 	return element;
 }
@@ -144,15 +158,15 @@ public static WebElement waitForElement(By locator, int timeout) {
 public static void clickWhenReady(By locator, int timeout) {
 	try {
 		WebElement element = null;
-		System.out.println("Waiting for max:: " + timeout + " seconds for element to be clickable");
+		LOG.info("Waiting for max:: " + timeout + " seconds for element to be clickable");
 		
 		WebDriverWait wait = new WebDriverWait(driver, 3);
 		element = wait.until(
 				ExpectedConditions.elementToBeClickable(locator));
 		element.click();
-		System.out.println("Element clicked on the web page");	
+		LOG.info("Element clicked on the web page");	
 	} catch(Exception e) {
-		System.out.println("Element not appeared on the web page");
+		LOG.error("Element not appeared on the web page");
 	}
 }
 
@@ -191,4 +205,52 @@ public static void takeSnapShot(WebDriver driver) throws Exception{
 	}
 
 }
+
+public static void ClickJS(WebElement Elament,WebDriver driver ) throws Exception{
+
+	try {
+	WebDriverWait wait = new WebDriverWait(driver, 3);
+	Elament = wait.until(
+			ExpectedConditions.elementToBeClickable(Elament));
+	js.executeScript("arguments[0].click();", Elament);
+	LOG.info("Element clicked on the web page");	} 
+	catch(Exception e) {
+		LOG.error("Element not appeared on the web page");
+	}
+	
+}
+
+//get all links To Click ('a') and put them in list
+public static List<WebElement> clickableLinks(WebDriver driver) {
+	List<WebElement> linksToClick = new ArrayList<WebElement>();
+	List<WebElement> elements = driver.findElements(By.tagName("a"));
+	elements.addAll(driver.findElements(By.tagName("img")));
+	
+	for (WebElement e : elements) {
+		if (e.getAttribute("href") != null) {
+			linksToClick.add(e);
+		}
+	}
+	return linksToClick;
+}
+
+//return response message from url and disconnect.
+public static String linkStatus(URL url) {
+	try {
+		HttpURLConnection http = (HttpURLConnection) url.openConnection();
+		http.connect();
+		String responseMessage = http.getResponseMessage();
+		http.disconnect();
+		return responseMessage;
+	}
+	catch (Exception e) {
+		return e.getMessage();
+	}
+}
+
+
+
+
+
+
 }
