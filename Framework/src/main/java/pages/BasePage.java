@@ -218,6 +218,7 @@ public static void ClickJS(WebElement Elament,WebDriver driver ) throws Exceptio
 		LOG.error("Element not appeared on the web page");
 	}
 	
+	
 }
 
 //get all links To Click ('a') and put them in list
